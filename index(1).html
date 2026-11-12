@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CONSTRUOBRA — Calculadora de Materiales y Presupuestos</title>
+
+  <!-- Google Fonts: Wix Madefor Display & Instrument Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Wix+Madefor+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN con configuración Stitch -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'accent': '#F59E0B',
+            'success': '#15803D',
+            'on-success': '#FFFFFF',
+            'warning': '#B45309',
+            'on-warning': '#FFFFFF',
+            'error': '#B91C1C',
+            'on-error': '#FFFFFF',
+            'info': '#1D4ED8',
+            'on-info': '#FFFFFF',
+            'concrete-100': '#F1F5F9',
+            'concrete-200': '#E2E8F0',
+            'concrete-700': '#334155',
+            'concrete-900': '#0F172A',
+            'light-primary': '#B45309',
+            'light-on-primary': '#FFFFFF',
+            'light-primary-container': '#FEF3C7',
+            'light-on-primary-container': '#78350F',
+            'light-secondary': '#1E40AF',
+            'light-on-secondary': '#FFFFFF',
+            'light-surface': '#FFFFFF',
+            'light-on-surface': '#0F172A',
+            'light-surface-container-low': '#F8FAFC',
+            'light-surface-container': '#F1F5F9',
+            'light-surface-container-high': '#E2E8F0',
+            'light-on-surface-variant': '#475569',
+            'light-outline': '#CBD5E1',
+            'light-outline-variant': '#E2E8F0',
+          },
+          borderRadius: {
+            'sm': '6px',
+            'DEFAULT': '10px',
+            'md': '12px',
+            'lg': '16px',
+            'xl': '20px',
+            'full': '9999px',
+          },
+          fontFamily: {
+            'display': ['"Wix Madefor Display"', 'sans-serif'],
+            'headline': ['"Wix Madefor Display"', 'sans-serif'],
+            'body': ['"Instrument Sans"', 'sans-serif'],
+            'label': ['"Instrument Sans"', 'sans-serif'],
+            'mono': ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Instrument Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-headline {
+      font-family: 'Wix Madefor Display', sans-serif;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-1 {
+      font-variation-settings: 'FILL' 1;
+    }
+    .view-section {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    .view-section.active {
+      display: block;
+      opacity: 1;
+    }
+    /* Estilos de impresión académica */
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print, header button, nav, .print-hide {
+        display: none !important;
+      }
+      #view-presupuesto {
+        display: block !important;
+        opacity: 1 !important;
+      }
+      .view-section:not(#view-presupuesto) {
+        display: none !important;
+      }
+      .print-shadow-none {
+        box-shadow: none !important;
+        border: 1px solid #d1d5db !important;
+      }
+      .print-show {
+        display: block !important;
+      }
+    }
+    .print-show {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-light-surface-container-low text-light-on-surface font-body min-h-screen flex flex-col antialiased selection:bg-light-primary-container selection:text-light-on-primary-container">
+
+  <!-- Contenedor responsivo centrado -->
+  <div class="flex-1 flex flex-col w-full max-w-xl mx-auto bg-light-surface-container-low min-h-screen relative shadow-xl shadow-slate-900/5 pb-24 border-x border-light-outline-variant/60">
+
+    <!-- ==================== HEADER UNIVERSAL ==================== -->
+    <header class="sticky top-0 z-40 bg-light-surface/95 backdrop-blur-md border-b border-light-outline-variant px-4 py-3 no-print">
+      <div class="flex items-center justify-between">
+        
+        <!-- Botón Volver / Logo -->
+        <div class="flex items-center gap-2.5">
+          <button id="btn-back-to-hub" type="button" class="hidden w-8 h-8 rounded-DEFAULT flex items-center justify-center text-light-on-surface-variant hover:text-light-on-surface hover:bg-light-surface-container transition-colors" title="Volver al panel central">
+            <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+          </button>
+          
+          <div id="header-logo-container" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-DEFAULT bg-light-primary flex items-center justify-center text-light-on-primary shadow-xs">
+              <span class="material-symbols-outlined text-[20px] fill-1">architecture</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="font-headline text-[16px] font-bold text-light-on-surface tracking-tight">CONSTRU<span class="text-light-primary">OBRA</span></span>
+                <span class="bg-light-primary-container text-light-on-primary-container text-[10px] font-semibold px-1.5 py-0.5 rounded-sm">PRD CIVIL</span>
+              </div>
+              <p id="header-subtitle" class="text-[11px] text-light-on-surface-variant leading-none">Ingeniería Civil · Talleres &amp; Cálculos</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones del Header -->
+        <div class="flex items-center gap-1.5">
+          <!-- Botón de Alcance y Ayuda PRD -->
+          <button id="btn-open-scope-modal" type="button" aria-label="Alcance académico y normas" class="w-8 h-8 rounded-DEFAULT flex items-center justify-center text-light-on-surface-variant hover:text-light-on-surface hover:bg-light-surface-container transition-colors" title="Alcance Académico & PRD">
+            <span class="material-symbols-outlined text-[20px]">help_outline</span>
+          </button>
+
+          <!-- Avatar / Estudiante -->
+          <button id="btn-student-profile" type="button" aria-label="Datos del estudiante" class="h-8 px-2.5 rounded-DEFAULT bg-light-surface-container border border-light-outline-variant text-light-secondary font-headline text-[12px] font-semibold flex items-center gap-1 hover:bg-light-surface-container-high transition-colors" title="Editar estudiante / proyecto">
+            <span class="material-symbols-outlined text-[16px]">school</span>
+            <span id="header-student-badge">Estudiante</span>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+
+    <!-- ==================== VISTA 1: PANEL CENTRAL (HUB) ==================== -->
+    <main id="view-hub" class="view-section active flex-1 px-4 py-4 space-y-4">
+      
+      <!-- Banner de Taller Activo y Datos del Estudiante -->
+      <section class="bg-light-surface border border-light-outline-variant rounded-lg p-3.5 shadow-xs space-y-2.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5 text-light-secondary">
+            <span class="material-symbols-outlined text-[16px]">school</span>
+            <span class="text-[11px] font-semibold tracking-wide uppercase font-label">Taller Activo de Ingeniería Civil</span>
+          </div>
+          <span class="text-[10px] bg-light-surface-container px-2 py-0.5 rounded font-medium text-light-on-surface-variant">Editable</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label for="direct-student-name" class="block text-[11px] font-medium text-light-on-surface-variant mb-0.5">Nombre del Estudiante:</label>
+            <div class="relative flex items-center">
+              <span class="material-symbols-outlined text-[16px] text-light-outline absolute left-2 pointer-events-none">person</span>
+              <input id="direct-student-name" type="text" placeholder="Ingresa tu nombre..." class="w-full text-[13px] font-semibold text-light-on-surface bg-light-surface-container-low border border-light-outline rounded-DEFAULT pl-7 pr-2.5 py-1.5 focus:border-light-primary focus:bg-light-surface focus:outline-none transition-colors">
+            </div>
+          </div>
+
+          <div>
+            <label for="direct-project-name" class="block text-[11px] font-medium text-light-on-surface-variant mb-0.5">Proyecto / Taller:</label>
+            <div class="relative flex items-center">
+              <span class="material-symbols-outlined text-[16px] text-light-outline absolute left-2 pointer-events-none">assignment</span>
+              <input id="direct-project-name" type="text" placeholder="Ej. Taller 1 (Placas y Muros)..." class="w-full text-[13px] font-semibold text-light-on-surface bg-light-surface-container-low border border-light-outline rounded-DEFAULT pl-7 pr-2.5 py-1.5 focus:border-light-primary focus:bg-light-surface focus:outline-none transition-colors">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tarjetas de Resumen Rápido (Stats Bar) -->
+      <section class="grid grid-cols-2 gap-2.5">
+        <div class="bg-light-surface rounded-lg p-3 border border-light-outline-variant">
+          <span class="text-[12px] text-light-on-surface-variant flex items-center gap-1 mb-1 font-medium">
+            <span class="material-symbols-outlined text-[15px] text-light-primary">view_in_ar</span>
+            Concreto calculado
+          </span>
+          <p class="font-headline text-[20px] font-bold text-light-on-surface tabular-nums">
+            <span id="hub-stat-concrete">1.058</span> <span class="text-[12px] text-light-on-surface-variant font-normal">m³</span>
+          </p>
+          <span id="hub-stat-cement" class="text-[11px] text-light-primary font-medium">~10 bultos cem.</span>
+        </div>
+
+        <div class="bg-light-surface rounded-lg p-3 border border-light-outline-variant cursor-pointer hover:border-light-primary transition-colors" id="hub-card-presupuesto-stat">
+          <span class="text-[12px] text-light-on-surface-variant flex items-center gap-1 mb-1 font-medium">
+            <span class="material-symbols-outlined text-[15px] text-amber-600">request_quote</span>
+            Presupuesto total
+          </span>
+          <p id="hub-stat-budget" class="font-headline text-[20px] font-bold text-light-on-surface tabular-nums">$ 1.842.500</p>
+          <span id="hub-stat-items" class="text-[11px] text-light-on-surface-variant">4 materiales cotizados</span>
+        </div>
+      </section>
+
+      <!-- Listado de los 5 Módulos de Cálculo según PRD -->
+      <section class="space-y-2.5">
+        <div class="flex items-center justify-between px-0.5">
+          <h2 class="font-headline text-[15px] font-bold text-light-on-surface">Herramientas de Cálculo</h2>
+          <span class="text-[11px] font-medium text-light-on-surface-variant">5 módulos PRD</span>
+        </div>
+
+        <!-- Módulo 1: Concreto por Elementos -->
+        <div class="cursor-pointer p-3.5 rounded-lg bg-light-surface border border-light-outline hover:border-light-primary transition-all active:scale-[0.99] group shadow-xs" data-nav-target="view-concreto">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-md bg-light-primary-container text-light-on-primary-container flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[22px]">view_in_ar</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="font-headline text-[15px] font-semibold text-light-on-surface group-hover:text-light-primary transition-colors">1. Cantidades de Concreto</h3>
+                <span class="material-symbols-outlined text-light-outline group-hover:text-light-primary text-[18px]">arrow_forward</span>
+              </div>
+              <p class="text-[12.5px] text-light-on-surface-variant mt-0.5">
+                Cálculo de volumen en m³ para vigas, columnas, placas y zapatas con factor de desperdicio.
+              </p>
+              <div class="flex items-center gap-2 mt-2 pt-2 border-t border-light-outline-variant text-[11px] text-light-on-surface-variant">
+                <span class="inline-flex items-center gap-0.5 font-medium text-light-primary">
+                  <span class="material-symbols-outlined text-[13px]">check_circle</span>
+                  Columna / Viga / Placa
+                </span>
+                <span>·</span>
+                <span>Largo × Ancho × Alto</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Módulo 2: Dosificación de Materiales -->
+        <div class="cursor-pointer p-3.5 rounded-lg bg-light-surface border border-light-outline hover:border-light-primary transition-all active:scale-[0.99] group shadow-xs" data-nav-target="view-concreto" data-scroll-to="sec-dosificacion">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-md bg-blue-100 text-light-secondary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[22px]">grain</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="font-headline text-[15px] font-semibold text-light-on-surface group-hover:text-light-primary transition-colors">2. Dosificación de Materiales</h3>
+                <span class="material-symbols-outlined text-light-outline group-hover:text-light-primary text-[18px]">arrow_forward</span>
+              </div>
+              <p class="text-[12.5px] text-light-on-surface-variant mt-0.5">
+                Calcula bultos de cemento, m³ de arena, grava y litros de agua según resistencia f'c (1:2:2, 1:2:3, etc.).
+              </p>
+              <div class="flex items-center gap-2 mt-2 pt-2 border-t border-light-outline-variant text-[11px] text-light-on-surface-variant">
+                <span class="bg-light-surface-container px-1.5 py-0.5 rounded-sm font-mono text-[10px]">1:2:3 (3000 PSI)</span>
+                <span>Sacos de 50 kg</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Módulo 3: Ladrillos y Muros -->
+        <div class="cursor-pointer p-3.5 rounded-lg bg-light-surface border border-light-outline hover:border-light-primary transition-all active:scale-[0.99] group shadow-xs" data-nav-target="view-ladrillos">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-md bg-amber-100 text-amber-900 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[22px]">grid_view</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="font-headline text-[15px] font-semibold text-light-on-surface group-hover:text-light-primary transition-colors">3. Cantidad de Ladrillos</h3>
+                <span class="material-symbols-outlined text-light-outline group-hover:text-light-primary text-[18px]">arrow_forward</span>
+              </div>
+              <p class="text-[12.5px] text-light-on-surface-variant mt-0.5">
+                Dimensiones de pared (largo × alto), espesor de juntas (1.5 cm) y descuento de vanos de puertas y ventanas.
+              </p>
+              <div class="flex items-center gap-2 mt-2 pt-2 border-t border-light-outline-variant text-[11px] text-light-on-surface-variant">
+                <span>Tolete / Bloque arcilla</span>
+                <span>·</span>
+                <span class="text-emerald-700 font-medium">Mortero de pega incluido</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Módulo 4: Áreas y Excavaciones -->
+        <div class="cursor-pointer p-3.5 rounded-lg bg-light-surface border border-light-outline hover:border-light-primary transition-all active:scale-[0.99] group shadow-xs" data-nav-target="view-excavacion">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-md bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[22px]">square_foot</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="font-headline text-[15px] font-semibold text-light-on-surface group-hover:text-light-primary transition-colors">4. Áreas y Excavaciones</h3>
+                <span class="material-symbols-outlined text-light-outline group-hover:text-light-primary text-[18px]">arrow_forward</span>
+              </div>
+              <p class="text-[12.5px] text-light-on-surface-variant mt-0.5">
+                Áreas de terrenos y pisos, cálculo de zanjas y volumen esponjado para viajes de volqueta.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Módulo 5: Presupuesto y Costos -->
+        <div class="cursor-pointer p-3.5 rounded-lg bg-light-surface border border-light-outline hover:border-light-primary transition-all active:scale-[0.99] group shadow-xs" data-nav-target="view-presupuesto">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-md bg-purple-100 text-purple-800 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[22px]">calculate</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h3 class="font-headline text-[15px] font-semibold text-light-on-surface group-hover:text-light-primary transition-colors">5. Presupuesto de Materiales</h3>
+                <span class="material-symbols-outlined text-light-outline group-hover:text-light-primary text-[18px]">arrow_forward</span>
+              </div>
+              <p class="text-[12.5px] text-light-on-surface-variant mt-0.5">
+                Cantidades consolidadas × precios unitarios locales, contingencia e informe en PDF.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Mini-Calculadora Rápida en Vivo del Hub -->
+      <section class="bg-light-surface rounded-lg border border-light-outline p-4 space-y-3 shadow-xs">
+        <div class="flex items-center justify-between border-b border-light-outline-variant pb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-light-primary"></span>
+            <h2 class="font-headline text-[14.5px] font-bold text-light-on-surface">Cálculo Rápido de Concreto</h2>
+          </div>
+          <span class="text-[11px] font-medium text-light-on-surface-variant">Prueba en vivo</span>
+        </div>
+
+        <!-- Selector de elemento rápido -->
+        <div class="flex p-0.5 bg-light-surface-container rounded-sm border border-light-outline-variant text-[12px]">
+          <button id="quick-elem-col" type="button" class="flex-1 py-1.5 text-center font-semibold rounded-xs bg-light-surface text-light-primary shadow-xs">Columna</button>
+          <button id="quick-elem-beam" type="button" class="flex-1 py-1.5 text-center font-medium text-light-on-surface-variant hover:text-light-on-surface">Viga</button>
+          <button id="quick-elem-slab" type="button" class="flex-1 py-1.5 text-center font-medium text-light-on-surface-variant hover:text-light-on-surface">Placa</button>
+        </div>
+
+        <!-- Inputs de medidas rápidas -->
+        <div class="grid grid-cols-3 gap-2">
+          <label class="block">
+            <span class="text-[11px] font-medium text-light-on-surface-variant mb-1 block">Largo (m)</span>
+            <input id="quick-largo" type="number" step="0.05" value="0.30" class="w-full text-center py-1.5 px-1 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono focus:border-light-primary focus:outline-none">
+          </label>
+          <label class="block">
+            <span class="text-[11px] font-medium text-light-on-surface-variant mb-1 block">Ancho (m)</span>
+            <input id="quick-ancho" type="number" step="0.05" value="0.30" class="w-full text-center py-1.5 px-1 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono focus:border-light-primary focus:outline-none">
+          </label>
+          <label class="block">
+            <span class="text-[11px] font-medium text-light-on-surface-variant mb-1 block">Alto (m)</span>
+            <input id="quick-alto" type="number" step="0.10" value="2.70" class="w-full text-center py-1.5 px-1 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono focus:border-light-primary focus:outline-none">
+          </label>
+        </div>
+
+        <!-- Multiplicador y Desperdicio -->
+        <div class="flex items-center justify-between pt-1">
+          <div class="flex items-center gap-2">
+            <span class="text-[12px] text-light-on-surface-variant">Cantidad:</span>
+            <div class="flex items-center border border-light-outline rounded-DEFAULT bg-light-surface">
+              <button id="quick-btn-minus" type="button" class="w-7 h-7 flex items-center justify-center text-light-on-surface hover:bg-light-surface-container font-bold">-</button>
+              <span id="quick-txt-qty" class="w-8 text-center text-[12px] font-semibold tabular-nums">4</span>
+              <button id="quick-btn-plus" type="button" class="w-7 h-7 flex items-center justify-center text-light-on-surface hover:bg-light-surface-container font-bold">+</button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <span class="text-[12px] text-light-on-surface-variant">Desperdicio:</span>
+            <select id="quick-sel-waste" class="text-[12px] py-1 px-2 rounded-DEFAULT border border-light-outline bg-light-surface font-medium">
+              <option value="1.05">+5% (Estándar)</option>
+              <option value="1.08">+8% (Bombeo)</option>
+              <option value="1.00">0% (Teórico)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Resultado en vivo -->
+        <div class="bg-light-primary-container/60 border border-amber-300 rounded-DEFAULT p-3 flex items-center justify-between">
+          <div>
+            <span class="text-[10.5px] uppercase tracking-wider font-semibold text-light-on-primary-container block">Volumen Calculado</span>
+            <div class="flex items-baseline gap-1">
+              <span id="quick-res-volume" class="font-headline text-[22px] font-bold text-light-on-primary-container tabular-nums">1.021</span>
+              <span class="text-[12px] font-semibold text-light-on-primary-container">m³</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] text-light-on-primary-container block">Cemento est. (1:2:2)</span>
+            <span id="quick-res-cement" class="text-[13px] font-bold text-light-primary tabular-nums">~10 bultos (50kg)</span>
+          </div>
+        </div>
+
+        <button id="quick-btn-add-budget" type="button" class="w-full py-2.5 rounded-DEFAULT bg-light-primary text-light-on-primary text-[13px] font-semibold hover:brightness-105 active:scale-[0.99] transition-all flex items-center justify-center gap-1.5 shadow-xs">
+          <span class="material-symbols-outlined text-[18px]">add_circle</span>
+          <span>Añadir a Memoria del Taller</span>
+        </button>
+      </section>
+
+      <!-- Nota de Alcance Académico PRD en el Hub -->
+      <section class="bg-light-surface-container rounded-lg p-3.5 border border-light-outline-variant space-y-1.5">
+        <div class="flex items-center gap-1.5 text-light-on-surface-variant">
+          <span class="material-symbols-outlined text-[16px]">info</span>
+          <span class="text-[11px] font-semibold uppercase tracking-wide font-label">Alcance Académico &amp; Limitaciones</span>
+        </div>
+        <p class="text-[11.5px] text-light-on-surface-variant leading-relaxed">
+          CONSTRUOBRA realiza <strong>estimaciones paramétricas y didácticas</strong> para estudiantes de primeros semestres. No realiza diseños estructurales sismorresistentes, no reemplaza normativas de construcción ni efectúa transacciones de compra a proveedores.
+        </p>
+      </section>
+
+    </main>
+
+
+    <!-- ==================== VISTA 2: CONCRETO Y DOSIFICACIÓN ==================== -->
+    <main id="view-concreto" class="view-section flex-1 px-4 py-4 space-y-4">
+      
+      <!-- Paso 1: Elemento Constructivo y Dimensiones -->
+      <section class="bg-light-surface rounded-lg border border-light-outline p-4 space-y-3.5 shadow-xs">
+        <div class="flex items-center justify-between border-b border-light-outline-variant pb-2">
+          <span class="font-label text-[12px] uppercase tracking-wider text-light-primary font-bold">1. Elemento Constructivo</span>
+          <span class="text-[11px] text-light-on-surface-variant">Unidad: Metros (m)</span>
+        </div>
+
+        <!-- Selector de Tipo de Elemento -->
+        <div>
+          <label class="block text-[12px] font-semibold text-light-on-surface mb-1.5">Tipo de elemento</label>
+          <div class="grid grid-cols-3 gap-1.5 p-1 bg-light-surface-container rounded-DEFAULT border border-light-outline-variant">
+            <button id="conc-type-col" type="button" class="conc-elem-btn py-2 text-center text-[12px] font-semibold rounded-sm bg-light-surface text-light-primary shadow-xs" data-type="columna">Columna</button>
+            <button id="conc-type-beam" type="button" class="conc-elem-btn py-2 text-center text-[12px] font-medium rounded-sm text-light-on-surface-variant hover:text-light-on-surface" data-type="viga">Viga</button>
+            <button id="conc-type-slab" type="button" class="conc-elem-btn py-2 text-center text-[12px] font-medium rounded-sm text-light-on-surface-variant hover:text-light-on-surface" data-type="placa">Placa / Losa</button>
+          </div>
+        </div>
+
+        <!-- Inputs de Medidas -->
+        <div class="grid grid-cols-3 gap-2">
+          <label class="block">
+            <span id="lbl-conc-largo" class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Largo</span>
+            <div class="relative flex items-center">
+              <input id="conc-largo" type="number" step="0.01" value="0.30" class="w-full text-center py-2 px-1 text-[14px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+              <span class="absolute right-2 text-[10px] text-light-on-surface-variant pointer-events-none">m</span>
+            </div>
+          </label>
+          <label class="block">
+            <span id="lbl-conc-ancho" class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Ancho</span>
+            <div class="relative flex items-center">
+              <input id="conc-ancho" type="number" step="0.01" value="0.30" class="w-full text-center py-2 px-1 text-[14px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+              <span class="absolute right-2 text-[10px] text-light-on-surface-variant pointer-events-none">m</span>
+            </div>
+          </label>
+          <label class="block">
+            <span id="lbl-conc-alto" class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Alto</span>
+            <div class="relative flex items-center">
+              <input id="conc-alto" type="number" step="0.01" value="2.80" class="w-full text-center py-2 px-1 text-[14px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+              <span class="absolute right-2 text-[10px] text-light-on-surface-variant pointer-events-none">m</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Multiplicador y Desperdicio -->
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <div>
+            <span class="block text-[12px] font-medium text-light-on-surface mb-1">N° de Elementos</span>
+            <div class="flex items-center border border-light-outline rounded-DEFAULT bg-light-surface h-[38px]">
+              <button id="conc-btn-minus" type="button" class="w-9 h-full flex items-center justify-center text-light-on-surface hover:bg-light-surface-container font-bold">-</button>
+              <span id="conc-qty" class="flex-1 text-center font-semibold text-[14px] tabular-nums">4</span>
+              <button id="conc-btn-plus" type="button" class="w-9 h-full flex items-center justify-center text-light-on-surface hover:bg-light-surface-container font-bold">+</button>
+            </div>
+          </div>
+
+          <div>
+            <span class="block text-[12px] font-medium text-light-on-surface mb-1">% Desperdicio</span>
+            <select id="conc-waste" class="w-full h-[38px] text-[13px] px-2 rounded-DEFAULT border border-light-outline bg-light-surface font-medium focus:border-light-primary focus:outline-none">
+              <option value="1.05" selected>+5% (Encofrado normal)</option>
+              <option value="1.08">+8% (Bombeo)</option>
+              <option value="1.10">+10% (Vaciado manual)</option>
+              <option value="1.00">0% (Teórico)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Volumen Calculado Banner -->
+        <div class="bg-light-surface-container rounded-DEFAULT p-3 border border-light-outline-variant flex items-center justify-between">
+          <div>
+            <span class="text-[11px] text-light-on-surface-variant font-medium">Volumen Total Requerido</span>
+            <div class="flex items-baseline gap-1 mt-0.5">
+              <span id="conc-res-vol" class="font-headline text-[26px] font-bold text-light-primary tabular-nums">1.058</span>
+              <span class="text-[13px] font-semibold text-light-on-surface">m³ de concreto</span>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-[32px] text-light-outline">view_in_ar</span>
+        </div>
+      </section>
+
+      <!-- Paso 2: Dosificación de Materiales para la Mezcla -->
+      <section id="sec-dosificacion" class="bg-light-surface rounded-lg border border-light-outline p-4 space-y-3.5 shadow-xs">
+        <div class="flex items-center justify-between border-b border-light-outline-variant pb-2">
+          <span class="font-label text-[12px] uppercase tracking-wider text-light-secondary font-bold">2. Dosificación Técnica</span>
+          <span class="bg-blue-50 text-light-secondary text-[11px] font-semibold px-2 py-0.5 rounded-sm">f'c sugerido</span>
+        </div>
+
+        <!-- Selector de Proporción -->
+        <div>
+          <label class="block text-[12px] font-semibold text-light-on-surface mb-1.5">Resistencia &amp; Proporción (Cemento : Arena : Grava)</label>
+          <select id="conc-ratio" class="w-full py-2.5 px-3 rounded-DEFAULT border border-light-outline bg-light-surface font-medium text-[13px] focus:border-light-primary focus:outline-none">
+            <option value="1:2:2" data-cemento="10.5" data-arena="0.55" data-grava="0.65" data-agua="210">1 : 2 : 2 · 3500 PSI (Columnas y vigas cargadas)</option>
+            <option value="1:2:3" data-cemento="9.0" data-arena="0.58" data-grava="0.75" data-agua="190" selected>1 : 2 : 3 · 3000 PSI (Estructuras estándar)</option>
+            <option value="1:2:4" data-cemento="7.5" data-arena="0.58" data-grava="0.82" data-agua="180">1 : 2 : 4 · 2500 PSI (Pisos y placas leves)</option>
+            <option value="1:3:3" data-cemento="7.0" data-arena="0.68" data-grava="0.70" data-agua="175">1 : 3 : 3 · 2000 PSI (Cimientos corridos)</option>
+            <option value="1:3:6" data-cemento="5.0" data-arena="0.55" data-grava="0.90" data-agua="160">1 : 3 : 6 · 1500 PSI (Solados de limpieza)</option>
+          </select>
+          <p class="text-[11px] text-light-on-surface-variant mt-1">Valores estimados por metro cúbico (m³) para bultos de 50 kg.</p>
+        </div>
+
+        <!-- Desglose de Materiales -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <!-- Cemento -->
+          <div class="p-3 rounded-DEFAULT bg-amber-50/70 border border-amber-200">
+            <div class="flex items-center justify-between text-amber-900 text-[11px] mb-1 font-semibold">
+              <span>Cemento Gris</span>
+              <span class="material-symbols-outlined text-[16px]">inventory_2</span>
+            </div>
+            <p id="res-mat-cemento" class="font-headline text-[22px] font-bold text-light-primary tabular-nums">10.0</p>
+            <span class="text-[11px] text-amber-800">Bultos de 50 kg</span>
+          </div>
+
+          <!-- Arena -->
+          <div class="p-3 rounded-DEFAULT bg-amber-50/70 border border-amber-200">
+            <div class="flex items-center justify-between text-amber-900 text-[11px] mb-1 font-semibold">
+              <span>Arena Gruesa</span>
+              <span class="material-symbols-outlined text-[16px]">grain</span>
+            </div>
+            <p id="res-mat-arena" class="font-headline text-[22px] font-bold text-amber-950 tabular-nums">0.61</p>
+            <span class="text-[11px] text-amber-800">m³ de arena lavada</span>
+          </div>
+
+          <!-- Grava -->
+          <div class="p-3 rounded-DEFAULT bg-slate-100 border border-slate-200">
+            <div class="flex items-center justify-between text-slate-800 text-[11px] mb-1 font-semibold">
+              <span>Grava / Triturado</span>
+              <span class="material-symbols-outlined text-[16px]">hardware</span>
+            </div>
+            <p id="res-mat-grava" class="font-headline text-[22px] font-bold text-slate-900 tabular-nums">0.79</p>
+            <span class="text-[11px] text-slate-700">m³ (tamaño 3/4")</span>
+          </div>
+
+          <!-- Agua -->
+          <div class="p-3 rounded-DEFAULT bg-blue-50 border border-blue-200">
+            <div class="flex items-center justify-between text-blue-900 text-[11px] mb-1 font-semibold">
+              <span>Agua limpia</span>
+              <span class="material-symbols-outlined text-[16px]">water_drop</span>
+            </div>
+            <p id="res-mat-agua" class="font-headline text-[22px] font-bold text-blue-950 tabular-nums">201</p>
+            <span class="text-[11px] text-blue-800">Litros aprox.</span>
+          </div>
+        </div>
+
+        <!-- Acciones: Enviar al Presupuesto -->
+        <div class="space-y-2 pt-2">
+          <button id="btn-add-conc-to-budget" type="button" class="w-full py-3 rounded-DEFAULT bg-light-primary text-light-on-primary text-[14px] font-semibold hover:brightness-105 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-xs">
+            <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+            <span>Enviar Cantidades a Presupuesto</span>
+          </button>
+
+          <button id="btn-goto-budget-from-conc" type="button" class="w-full py-2.5 rounded-DEFAULT bg-light-surface-container border border-light-outline text-light-on-surface text-[13px] font-medium hover:bg-light-surface-container-high transition-colors flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+            <span>Ver Presupuesto General</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Nota Pedagógica -->
+      <div class="p-3 rounded-DEFAULT bg-light-surface-container-low border border-light-outline-variant text-[11.5px] text-light-on-surface-variant flex items-start gap-2">
+        <span class="material-symbols-outlined text-[16px] text-amber-600 shrink-0 mt-0.5">school</span>
+        <span>Las proporciones volumétricas corresponden a métodos empíricos tradicionales para prácticas académicas. En obras reales se requiere diseño de mezcla por peso (método ACI).</span>
+      </div>
+
+    </main>
+
+
+    <!-- ==================== VISTA 3: LADRILLOS Y MAMPOSTERÍA ==================== -->
+    <main id="view-ladrillos" class="view-section flex-1 px-4 py-4 space-y-4">
+      
+      <!-- Tarjeta 1: Medidas de la Pared -->
+      <section class="bg-light-surface rounded-lg border border-light-outline p-4 space-y-3.5 shadow-xs">
+        <div class="flex items-center justify-between border-b border-light-outline-variant pb-2">
+          <span class="font-label text-[12px] uppercase tracking-wider text-amber-700 font-bold">1. Medidas de la Pared</span>
+          <span class="text-[11px] text-light-on-surface-variant">En metros (m)</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <label class="block">
+            <span class="block text-[12px] font-medium text-light-on-surface mb-1">Largo del muro</span>
+            <div class="relative flex items-center">
+              <input id="wall-length" type="number" step="0.1" value="5.50" class="w-full text-center py-2 px-1 text-[14px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+              <span class="absolute right-2 text-[10px] text-light-on-surface-variant pointer-events-none">m</span>
+            </div>
+          </label>
+          <label class="block">
+            <span class="block text-[12px] font-medium text-light-on-surface mb-1">Alto del muro</span>
+            <div class="relative flex items-center">
+              <input id="wall-height" type="number" step="0.1" value="2.60" class="w-full text-center py-2 px-1 text-[14px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+              <span class="absolute right-2 text-[10px] text-light-on-surface-variant pointer-events-none">m</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Área Bruta y Descuento de Vanos -->
+        <div class="bg-light-surface-container-low rounded-DEFAULT p-3 border border-light-outline-variant space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[12px] font-semibold text-light-on-surface flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-light-secondary">door_front</span>
+              Aberturas / Vanos a descontar
+            </span>
+            <span class="text-[11px] text-light-on-surface-variant">Puertas y ventanas</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-light-on-surface-variant block mb-0.5">Área puertas (m²)</label>
+              <input id="openings-doors" type="number" step="0.1" value="1.80" class="w-full py-1.5 px-2 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+              <span class="text-[10px] text-light-on-surface-variant block mt-0.5">Ej: 0.90m × 2.00m</span>
+            </div>
+            <div>
+              <label class="text-[11px] text-light-on-surface-variant block mb-0.5">Área ventanas (m²)</label>
+              <input id="openings-windows" type="number" step="0.1" value="2.40" class="w-full py-1.5 px-2 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+              <span class="text-[10px] text-light-on-surface-variant block mt-0.5">Ej: 1.50m × 1.60m</span>
+            </div>
+          </div>
+
+          <div class="pt-1.5 border-t border-light-outline-variant flex items-center justify-between">
+            <span class="text-[12px] text-light-on-surface-variant">Área neta efectiva:</span>
+            <span id="wall-net-area" class="font-headline font-bold text-light-on-surface text-[15px] tabular-nums">10.10 m²</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tarjeta 2: Tipo de Ladrillo y Junta -->
+      <section class="bg-light-surface rounded-lg border border-light-outline p-4 space-y-3.5 shadow-xs">
+        <div class="flex items-center justify-between border-b border-light-outline-variant pb-2">
+          <span class="font-label text-[12px] uppercase tracking-wider text-light-secondary font-bold">2. Tipo de Ladrillo &amp; Juntas</span>
+          <span class="text-[11px] text-light-on-surface-variant">En centímetros (cm)</span>
+        </div>
+
+        <div>
+          <label class="block text-[12px] font-semibold text-light-on-surface mb-1.5">Ladrillo estándar para el taller</label>
+          <select id="brick-preset" class="w-full py-2.5 px-3 rounded-DEFAULT border border-light-outline bg-light-surface font-medium text-[13px] focus:border-light-primary focus:outline-none">
+            <option value="24,12,6" selected>Tolete tradicional (24 × 12 × 6 cm)</option>
+            <option value="29,19,9">Bloque de arcilla N°4 (29 × 19 × 9 cm)</option>
+            <option value="29,19,12">Bloque estructural N°5 (29 × 19 × 12 cm)</option>
+            <option value="39,19,14">Bloque de concreto (39 × 19 × 14 cm)</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <label class="block">
+            <span class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Largo (L)</span>
+            <div class="relative flex items-center">
+              <input id="brick-l" type="number" step="0.5" value="24" class="w-full text-center py-2 px-1 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+              <span class="absolute right-2 text-[10px] text-light-on-surface-variant pointer-events-none">cm</span>
+            </div>
+          </label>
+          <label class="block">
+            <span class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Alto (H)</span>
+            <div class="relative flex items-center">
+              <input id="brick-h" type="number" step="0.5" value="6" class="w-full text-center py-2 px-1 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+              <span class="absolute right-2 text-[10px] text-light-on-surface-variant pointer-events-none">cm</span>
+            </div>
+          </label>
+          <label class="block">
+            <span class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Junta de pega</span>
+            <div class="relative flex items-center">
+              <input id="mortar-joint" type="number" step="0.1" value="1.5" class="w-full text-center py-2 px-1 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+              <span class="absolute right-2 text-[10px] text-light-on-surface-variant pointer-events-none">cm</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-[12px] font-medium text-light-on-surface">Factor de merma/desperdicio:</span>
+          <select id="brick-waste" class="py-1 px-2.5 rounded-DEFAULT border border-light-outline bg-light-surface text-[12px] font-medium">
+            <option value="1.05" selected>+5% (Recomendado)</option>
+            <option value="1.07">+7% (Muros con cortes)</option>
+            <option value="1.10">+10% (Tolete artesanal)</option>
+            <option value="1.00">0% (Teórico)</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Tarjeta 3: Resultados de Mampostería -->
+      <section class="bg-light-primary-container/40 rounded-lg border border-amber-300 p-4 space-y-3 shadow-xs">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5 text-light-on-primary-container">
+            <span class="material-symbols-outlined text-[18px]">verified</span>
+            <span class="font-headline font-bold text-[15px]">Cómputo Total de Ladrillos</span>
+          </div>
+          <span class="text-[10px] bg-white px-2 py-0.5 rounded-sm font-mono font-medium text-amber-900 border border-amber-200">C = 1 / [(L+j)×(H+j)]</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 bg-light-surface rounded-DEFAULT p-3 border border-amber-200">
+          <div>
+            <span class="text-[11px] text-light-on-surface-variant block">Ladrillos totales con merma</span>
+            <p id="res-total-bricks" class="font-headline text-[26px] font-bold text-light-primary tabular-nums">548</p>
+            <span class="text-[11px] text-light-on-surface-variant">unidades estimadas</span>
+          </div>
+          <div>
+            <span class="text-[11px] text-light-on-surface-variant block">Densidad por m²</span>
+            <p id="res-bricks-per-m2" class="font-headline text-[18px] font-bold text-light-on-surface tabular-nums">52.3 <span class="text-[12px] font-normal">lad/m²</span></p>
+            <span class="text-[11px] text-light-on-surface-variant">Con junta de 1.5 cm</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-[12px] text-light-on-surface px-1">
+          <span class="text-light-on-surface-variant">Mortero de pega estimado (1:4):</span>
+          <span id="res-mortar-vol" class="font-semibold tabular-nums">~0.18 m³ (~2 bultos cem.)</span>
+        </div>
+
+        <button id="btn-add-bricks-to-budget" type="button" class="w-full py-2.5 rounded-DEFAULT bg-light-primary text-light-on-primary text-[13px] font-semibold hover:brightness-105 active:scale-[0.99] transition-all flex items-center justify-center gap-1.5 shadow-xs">
+          <span class="material-symbols-outlined text-[18px]">post_add</span>
+          <span>Añadir Muro a Presupuesto</span>
+        </button>
+      </section>
+
+    </main>
+
+
+    <!-- ==================== VISTA 4: ÁREAS Y EXCAVACIONES ==================== -->
+    <main id="view-excavacion" class="view-section flex-1 px-4 py-4 space-y-4">
+      
+      <!-- Selector de Modo: Excavación vs Áreas de Terreno/Piso -->
+      <div class="flex p-1 bg-light-surface rounded-DEFAULT border border-light-outline-variant text-[12px]">
+        <button id="tab-excavacion-btn" type="button" class="flex-1 py-2 text-center rounded-sm font-semibold transition-colors bg-light-primary text-light-on-primary shadow-xs">
+          Excavación y Zanjas
+        </button>
+        <button id="tab-area-btn" type="button" class="flex-1 py-2 text-center rounded-sm font-medium transition-colors text-light-on-surface-variant hover:text-light-on-surface">
+          Área de Pisos / Terrenos
+        </button>
+      </div>
+
+      <!-- Sección 1: Excavaciones y Zanjas -->
+      <section id="panel-excavacion" class="bg-light-surface rounded-lg border border-light-outline p-4 space-y-3.5 shadow-xs">
+        <div class="flex items-center justify-between border-b border-light-outline-variant pb-2">
+          <div class="flex items-center gap-1.5 text-light-secondary">
+            <span class="material-symbols-outlined text-[18px]">landslide</span>
+            <span class="font-label text-[12px] uppercase tracking-wider font-bold">Zanja / Pozo de Cimentación</span>
+          </div>
+          <span class="text-[11px] text-light-on-surface-variant">Corte en banco</span>
+        </div>
+
+        <!-- Medidas de zanja -->
+        <div class="grid grid-cols-3 gap-2">
+          <label class="block">
+            <span class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Largo (L)</span>
+            <div class="relative flex items-center">
+              <input id="exc-largo" type="number" step="0.1" value="12.00" class="w-full text-center py-2 px-1 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+              <span class="absolute right-2 text-[10px] text-light-on-surface-variant pointer-events-none">m</span>
+            </div>
+          </label>
+          <label class="block">
+            <span class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Ancho (B)</span>
+            <div class="relative flex items-center">
+              <input id="exc-ancho" type="number" step="0.1" value="0.80" class="w-full text-center py-2 px-1 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+              <span class="absolute right-2 text-[10px] text-light-on-surface-variant pointer-events-none">m</span>
+            </div>
+          </label>
+          <label class="block">
+            <span class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Profundidad (H)</span>
+            <div class="relative flex items-center">
+              <input id="exc-prof" type="number" step="0.1" value="1.20" class="w-full text-center py-2 px-1 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+              <span class="absolute right-2 text-[10px] text-light-on-surface-variant pointer-events-none">m</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Tipo de suelo y esponjamiento -->
+        <div>
+          <label class="block text-[12px] font-semibold text-light-on-surface mb-1.5">Tipo de Suelo (% Esponjamiento de tierra)</label>
+          <select id="exc-soil" class="w-full py-2.5 px-3 rounded-DEFAULT border border-light-outline bg-light-surface font-medium text-[13px] focus:border-light-primary focus:outline-none">
+            <option value="1.20" selected>Tierra arcillosa / común (+20% esponjamiento)</option>
+            <option value="1.15">Arena / grava suelta (+15% esponjamiento)</option>
+            <option value="1.30">Arcilla compacta dura (+30% esponjamiento)</option>
+            <option value="1.50">Roca fracturada / cantera (+50% esponjamiento)</option>
+            <option value="1.00">Sin esponjamiento (Volumen en banco 0%)</option>
+          </select>
+          <p class="text-[11px] text-light-on-surface-variant mt-1">El esponjamiento es clave para calcular volquetas de desalojo de escombros.</p>
+        </div>
+
+        <!-- Resultados de excavación -->
+        <div class="bg-light-surface-container rounded-DEFAULT p-3.5 border border-light-outline-variant space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[11px] text-light-on-surface-variant block">Volumen geométrico en banco</span>
+              <span id="res-bank-vol" class="font-headline text-[16px] font-semibold text-light-on-surface tabular-nums">11.52 m³</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[11px] text-light-on-surface-variant block">Área superficial excavada</span>
+              <span id="res-area-top" class="font-headline text-[16px] font-semibold text-light-on-surface tabular-nums">9.60 m²</span>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-light-outline-variant flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-semibold text-light-primary uppercase tracking-wider block">Volumen Suelto para Retiro</span>
+              <div class="flex items-baseline gap-1">
+                <span id="res-loose-vol" class="font-headline text-[24px] font-bold text-light-primary tabular-nums">13.82</span>
+                <span class="text-[13px] font-semibold text-light-on-surface">m³ sueltos</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-light-on-surface-variant block">Capacidad volqueta 7m³</span>
+              <span id="res-trucks" class="text-[13px] font-bold text-light-secondary tabular-nums">~2 viajes</span>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-add-exca-to-budget" type="button" class="w-full py-2.5 rounded-DEFAULT bg-light-primary text-light-on-primary text-[13px] font-semibold hover:brightness-105 active:scale-[0.99] transition-all flex items-center justify-center gap-1.5 shadow-xs">
+          <span class="material-symbols-outlined text-[18px]">local_shipping</span>
+          <span>Añadir Acarreo de Tierra a Presupuesto</span>
+        </button>
+      </section>
+
+      <!-- Sección 2: Pisos y Superficies -->
+      <section id="panel-area" class="bg-light-surface rounded-lg border border-light-outline-variant p-4 space-y-3 shadow-xs">
+        <div class="flex items-center justify-between border-b border-light-outline-variant pb-2">
+          <div class="flex items-center gap-1.5 text-amber-700">
+            <span class="material-symbols-outlined text-[18px]">straighten</span>
+            <span class="font-label text-[12px] uppercase tracking-wider font-bold">Área de Piso / Contrapiso</span>
+          </div>
+          <span class="text-[11px] text-light-on-surface-variant">Acabado m²</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <span class="text-[11px] text-light-on-surface-variant block mb-1">Largo estancia (m)</span>
+            <input id="floor-l" type="number" step="0.1" value="6.00" class="w-full text-center py-2 px-1 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+          </div>
+          <div>
+            <span class="text-[11px] text-light-on-surface-variant block mb-1">Ancho estancia (m)</span>
+            <input id="floor-w" type="number" step="0.1" value="4.50" class="w-full text-center py-2 px-1 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono tabular-nums focus:border-light-primary focus:outline-none">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between bg-amber-50/60 p-2.5 rounded-DEFAULT border border-amber-200 text-[12px]">
+          <span class="text-amber-900 font-medium">Área total de solado/piso:</span>
+          <span id="res-floor-area" class="font-headline font-bold text-light-primary text-[16px] tabular-nums">27.00 m²</span>
+        </div>
+      </section>
+
+    </main>
+
+
+    <!-- ==================== VISTA 5: PRESUPUESTO ESTIMADO ==================== -->
+    <main id="view-presupuesto" class="view-section flex-1 px-4 py-4 space-y-4">
+      
+      <!-- Membrete exclusivo para impresión académica -->
+      <div class="print-show p-4 border border-slate-300 rounded-lg mb-4 text-xs">
+        <div class="flex justify-between items-center border-b pb-2 mb-2">
+          <div>
+            <h1 class="font-bold text-base">CONSTRUOBRA — Memoria de Presupuesto Académico</h1>
+            <p>Facultad de Ingeniería Civil · Cómputos Métricos y Cantidades de Obra</p>
+          </div>
+          <div class="text-right">
+            <p id="print-date">Fecha: --/--/----</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <p><strong>Estudiante:</strong> <span id="print-student-name">Estudiante de Ingeniería Civil</span></p>
+          <p><strong>Proyecto/Taller:</strong> <span id="print-project-name">Práctica de Obra y Materiales</span></p>
+        </div>
+      </div>
+
+      <!-- Banner de Total Presupuestado -->
+      <section class="bg-gradient-to-br from-light-primary to-amber-700 text-white rounded-lg p-4 shadow-sm print-shadow-none">
+        <div class="flex items-center justify-between opacity-90 text-[12px] pb-1 border-b border-white/20">
+          <span>Costo Total Estimado del Taller</span>
+          <div class="flex items-center gap-1">
+            <span class="text-[10px] opacity-80">Moneda:</span>
+            <select id="budget-currency-select" class="bg-white/20 text-white text-[11px] font-mono font-semibold px-2 py-0.5 rounded focus:outline-none cursor-pointer">
+              <option value="COP" selected class="text-slate-900">COP ($)</option>
+              <option value="USD" class="text-slate-900">USD ($)</option>
+              <option value="MXN" class="text-slate-900">MXN ($)</option>
+              <option value="EUR" class="text-slate-900">EUR (€)</option>
+            </select>
+          </div>
+        </div>
+        <div class="py-2">
+          <span id="grand-total-display" class="font-headline text-[32px] font-bold tracking-tight tabular-nums">$ 1.842.500</span>
+          <p class="text-[11.5px] opacity-85 mt-0.5">Incluye materiales computados + <span id="lbl-contingency-pct">5%</span> contingencia</p>
+        </div>
+        <div class="pt-2 border-t border-white/20 flex items-center justify-between text-[11px] opacity-90">
+          <span id="budget-project-name-sub">Proyecto: Práctica de Obra</span>
+          <span id="budget-items-count-badge">4 ítems activos</span>
+        </div>
+      </section>
+
+      <!-- Barra de acciones: Añadir Material y Limpiar -->
+      <div class="flex items-center justify-between px-0.5 no-print">
+        <h2 class="font-headline text-[15px] font-semibold text-light-on-surface">Materiales Computados</h2>
+        <div class="flex items-center gap-2">
+          <button id="btn-open-add-material-modal" type="button" class="text-[12px] font-semibold text-light-primary flex items-center gap-1 hover:underline">
+            <span class="material-symbols-outlined text-[16px]">add</span>
+            <span>Añadir material</span>
+          </button>
+          <span class="text-light-outline">·</span>
+          <button id="btn-clear-budget-list" type="button" class="text-[11px] text-light-on-surface-variant hover:text-red-600 transition-colors">
+            Vaciar lista
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de Artículos del Presupuesto -->
+      <section class="space-y-2.5" id="budget-list-container">
+        <!-- Se llena dinámicamente con JS -->
+      </section>
+
+      <!-- Recordatorio de Alcance del PRD -->
+      <div class="p-3 rounded-DEFAULT bg-light-surface-container border border-light-outline-variant text-[11px] text-light-on-surface-variant flex items-start gap-2">
+        <span class="material-symbols-outlined text-[16px] text-light-on-surface-variant shrink-0 mt-0.5">info</span>
+        <span>Esta calculadora estima costos de referencia con fines didácticos. No efectúa transacciones comerciales, compras a proveedores ni incluye honorarios de mano de obra.</span>
+      </div>
+
+      <!-- Botón de Exportar / Imprimir PDF -->
+      <button id="btn-export-pdf" type="button" class="w-full py-3 rounded-DEFAULT bg-light-primary text-light-on-primary font-label text-[14px] font-semibold hover:brightness-105 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-xs no-print">
+        <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+        <span>Generar Resumen de Costos en PDF (Imprimir)</span>
+      </button>
+
+    </main>
+
+
+    <!-- ==================== BARRA DE NAVEGACIÓN INFERIOR (BOTTOM NAV) ==================== -->
+    <nav class="fixed bottom-0 inset-x-0 bg-light-surface/95 backdrop-blur-md border-t border-light-outline-variant z-40 max-w-xl mx-auto no-print">
+      <div class="grid grid-cols-4 py-1.5 px-2">
+        <!-- Hub / Módulos -->
+        <button type="button" class="bottom-nav-item flex flex-col items-center justify-center py-1 text-light-primary active" data-view="view-hub">
+          <span class="material-symbols-outlined text-[22px] fill-1">dashboard</span>
+          <span class="text-[10px] font-semibold mt-0.5">Módulos</span>
+        </button>
+
+        <!-- Concreto -->
+        <button type="button" class="bottom-nav-item flex flex-col items-center justify-center py-1 text-light-on-surface-variant hover:text-light-on-surface" data-view="view-concreto">
+          <span class="material-symbols-outlined text-[22px]">view_in_ar</span>
+          <span class="text-[10px] font-medium mt-0.5">Concreto</span>
+        </button>
+
+        <!-- Ladrillos -->
+        <button type="button" class="bottom-nav-item flex flex-col items-center justify-center py-1 text-light-on-surface-variant hover:text-light-on-surface" data-view="view-ladrillos">
+          <span class="material-symbols-outlined text-[22px]">grid_view</span>
+          <span class="text-[10px] font-medium mt-0.5">Ladrillos</span>
+        </button>
+
+        <!-- Presupuesto / Costos -->
+        <button type="button" class="bottom-nav-item flex flex-col items-center justify-center py-1 text-light-on-surface-variant hover:text-light-on-surface relative" data-view="view-presupuesto">
+          <span class="material-symbols-outlined text-[22px]">receipt_long</span>
+          <span class="text-[10px] font-medium mt-0.5">Costos</span>
+          <span id="nav-budget-badge" class="absolute top-0.5 right-6 w-2 h-2 rounded-full bg-light-primary"></span>
+        </button>
+      </div>
+    </nav>
+
+  </div>
+
+
+  <!-- ==================== MODAL 1: ALCANCE TÉCNICO & PRD ==================== -->
+  <div id="modal-scope" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-light-surface rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-light-outline-variant shadow-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between border-b border-light-outline-variant pb-3">
+        <div class="flex items-center gap-2 text-light-primary">
+          <span class="material-symbols-outlined text-[22px]">verified_user</span>
+          <h3 class="font-headline font-bold text-[16px] text-light-on-surface">Alcance Técnico &amp; PRD CONSTRUOBRA</h3>
+        </div>
+        <button id="btn-close-scope-modal" type="button" class="text-light-on-surface-variant hover:text-light-on-surface p-1 rounded-DEFAULT">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-[12.5px] text-light-on-surface-variant leading-relaxed">
+        <p><strong>CONSTRUOBRA</strong> fue concebida para estudiantes de primeros semestres de Ingeniería Civil que necesitan calcular rápidamente cantidades de obra y presupuestos académicos para sus talleres y ejercicios prácticos.</p>
+
+        <div class="p-3 bg-emerald-50 rounded-DEFAULT border border-emerald-200 text-emerald-950 space-y-1">
+          <span class="font-bold text-[12px] uppercase block text-emerald-800">Lo que SÍ hace:</span>
+          <ul class="list-disc list-inside space-y-0.5 text-[11.5px]">
+            <li>Calcula volúmenes geométricos de concreto en vigas, columnas y placas.</li>
+            <li>Dosifica mezclas técnicas (cemento, arena, grava y agua).</li>
+            <li>Calcula ladrillos descontando vanos de puertas y ventanas.</li>
+            <li>Calcula áreas, zanjas, esponjamiento de suelo y viajes de volqueta.</li>
+            <li>Elabora presupuestos estimativos con precios unitarios configurables.</li>
+          </ul>
+        </div>
+
+        <div class="p-3 bg-rose-50 rounded-DEFAULT border border-rose-200 text-rose-950 space-y-1">
+          <span class="font-bold text-[12px] uppercase block text-rose-800">Lo que NO hace (Límites Estrictos):</span>
+          <ul class="list-disc list-inside space-y-0.5 text-[11.5px]">
+            <li><strong>No realiza diseños estructurales</strong> (acero de refuerzo, cortantes, momentos flectores).</li>
+            <li><strong>No valida normas de construcción ni seguridad sismorresistente</strong> (NSR-10, ACI 318).</li>
+            <li><strong>No realiza análisis de resistencia de materiales</strong> (ensayos destructivos en probetas de laboratorio).</li>
+            <li><strong>No genera planos arquitectónicos ni estructurales</strong>.</li>
+            <li><strong>No realiza compras de materiales ni pagos a proveedores</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-light-outline-variant flex justify-end">
+        <button id="btn-scope-ok" type="button" class="py-2 px-4 rounded-DEFAULT bg-light-primary text-light-on-primary font-semibold text-[13px]">
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== MODAL 2: EDITAR ESTUDIANTE / PROYECTO ==================== -->
+  <div id="modal-project" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-light-surface rounded-xl max-w-sm w-full border border-light-outline-variant shadow-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between border-b border-light-outline-variant pb-2.5">
+        <h3 class="font-headline font-bold text-[15px] text-light-on-surface">Datos del Estudiante y Taller</h3>
+        <button id="btn-close-project-modal" type="button" class="text-light-on-surface-variant hover:text-light-on-surface">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Nombre del Estudiante</label>
+          <input id="input-student-name" type="text" placeholder="Escribe tu nombre..." class="w-full py-2 px-2.5 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-medium focus:border-light-primary focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Nombre del Proyecto / Taller</label>
+          <input id="input-project-name" type="text" placeholder="Ej. Taller 1 (Placas y Muros)..." class="w-full py-2 px-2.5 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-medium focus:border-light-primary focus:outline-none">
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-light-outline-variant flex justify-end gap-2">
+        <button id="btn-save-project-data" type="button" class="w-full py-2 rounded-DEFAULT bg-light-primary text-light-on-primary font-semibold text-[13px]">
+          Guardar Cambios
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== MODAL 3: AÑADIR MATERIAL MANUAL ==================== -->
+  <div id="modal-add-material" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-light-surface rounded-xl max-w-sm w-full border border-light-outline-variant shadow-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between border-b border-light-outline-variant pb-2.5">
+        <h3 class="font-headline font-bold text-[15px] text-light-on-surface">Añadir Nuevo Material</h3>
+        <button id="btn-close-add-modal" type="button" class="text-light-on-surface-variant hover:text-light-on-surface">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <form id="form-new-material" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Nombre del Material</label>
+          <input id="new-mat-name" type="text" placeholder="Ej. Acero corrugado 3/8&#34;" required class="w-full py-2 px-2.5 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface focus:border-light-primary focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Unidad</label>
+            <input id="new-mat-unit" type="text" placeholder="Ej. Varilla / kg / m" value="Unidad" required class="w-full py-2 px-2.5 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface focus:border-light-primary focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Cantidad</label>
+            <input id="new-mat-qty" type="number" step="0.1" min="0.1" value="10" required class="w-full py-2 px-2.5 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono text-center focus:border-light-primary focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-medium text-light-on-surface-variant mb-1">Precio Unitario ($)</label>
+          <input id="new-mat-price" type="number" step="100" min="0" value="25000" required class="w-full py-2 px-2.5 text-[13px] rounded-DEFAULT border border-light-outline bg-light-surface font-mono text-center focus:border-light-primary focus:outline-none">
+        </div>
+
+        <button type="submit" class="w-full py-2.5 rounded-DEFAULT bg-light-primary text-light-on-primary font-semibold text-[13px] hover:brightness-105 transition-all">
+          Agregar al Presupuesto
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ==================== TOAST NOTIFICACIÓN FEEDBACK ==================== -->
+  <div id="app-toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 transform translate-y-8 opacity-0 pointer-events-none transition-all duration-300 max-w-sm w-11/12">
+    <div class="bg-slate-900/95 text-white py-2.5 px-4 rounded-xl shadow-xl flex items-center gap-2.5 text-[12.5px] border border-slate-700 backdrop-blur-sm">
+      <span class="material-symbols-outlined text-emerald-400 text-[18px]">check_circle</span>
+      <span id="toast-text" class="flex-1 font-medium">Materiales agregados al presupuesto con éxito.</span>
+    </div>
+  </div>
+
+
+  <!-- ==================== SCRIPT DE LA APLICACIÓN COMPLETA ==================== -->
+  <script>
+    (function() {
+      // Estado central de CONSTRUOBRA
+      const state = {
+        currentView: 'view-hub',
+        currency: 'COP',
+        contingencyPct: 0.05,
+        studentName: '',
+        projectName: 'Práctica de Obra (Placas y Muros)',
+        budgetItems: [
+          { id: '1', name: 'Cemento Gris Tipo UG', unitDesc: 'Bulto de 50 kg · Obtenido de Concreto', unit: 'bultos', qty: 13, price: 34000, category: 'Concreto' },
+          { id: '2', name: 'Arena Gruesa de Peña', unitDesc: 'Metros cúbicos (m³)', unit: 'm³', qty: 0.8, price: 78000, category: 'Agregados' },
+          { id: '3', name: 'Triturado 3/4"', unitDesc: 'Metros cúbicos (m³)', unit: 'm³', qty: 1.0, price: 95000, category: 'Agregados' },
+          { id: '4', name: 'Ladrillo Tolete Común', unitDesc: 'Unidades · Muro fachada (10.1 m²)', unit: 'unid', qty: 550, price: 2200, category: 'Mampostería' }
+        ]
+      };
+
+      // Cargar persistencia de LocalStorage si existe
+      function loadSavedData() {
+        try {
+          const savedItems = localStorage.getItem('construobra_budget_v2');
+          if (savedItems) state.budgetItems = JSON.parse(savedItems);
+
+          const savedStudent = localStorage.getItem('construobra_student_name');
+          if (savedStudent) state.studentName = savedStudent;
+
+          const savedProject = localStorage.getItem('construobra_project_name');
+          if (savedProject) state.projectName = savedProject;
+
+          const savedCurr = localStorage.getItem('construobra_currency');
+          if (savedCurr) state.currency = savedCurr;
+        } catch(e) {
+          console.warn('Storage read warning', e);
+        }
+      }
+
+      function saveData() {
+        try {
+          localStorage.setItem('construobra_budget_v2', JSON.stringify(state.budgetItems));
+          localStorage.setItem('construobra_student_name', state.studentName);
+          localStorage.setItem('construobra_project_name', state.projectName);
+          localStorage.setItem('construobra_currency', state.currency);
+        } catch(e) {
+          console.warn('Storage save warning', e);
+        }
+      }
+
+      loadSavedData();
+
+      // Formato de moneda
+      function formatMoney(amount) {
+        const sym = state.currency === 'EUR' ? '€ ' : '$ ';
+        return sym + Number(amount).toLocaleString('es-CO', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        });
+      }
+
+      // Sistema de Navegación de Vistas
+      const views = document.querySelectorAll('.view-section');
+      const navItems = document.querySelectorAll('.bottom-nav-item');
+      const backBtn = document.getElementById('btn-back-to-hub');
+      const headerSubtitle = document.getElementById('header-subtitle');
+
+      function navigateTo(viewId) {
+        state.currentView = viewId;
+        views.forEach(v => {
+          if (v.id === viewId) {
+            v.classList.add('active');
+          } else {
+            v.classList.remove('active');
+          }
+        });
+
+        // Actualizar barra inferior
+        navItems.forEach(item => {
+          const isTarget = item.getAttribute('data-view') === viewId;
+          const icon = item.querySelector('.material-symbols-outlined');
+          if (isTarget) {
+            item.className = 'bottom-nav-item flex flex-col items-center justify-center py-1 text-light-primary active';
+            if (icon) icon.classList.add('fill-1');
+          } else {
+            item.className = 'bottom-nav-item flex flex-col items-center justify-center py-1 text-light-on-surface-variant hover:text-light-on-surface';
+            if (icon) icon.classList.remove('fill-1');
+          }
+        });
+
+        // Manejar botón Volver del header
+        if (viewId === 'view-hub') {
+          backBtn.classList.add('hidden');
+          headerSubtitle.textContent = 'Ingeniería Civil · Talleres & Cálculos';
+        } else {
+          backBtn.classList.remove('hidden');
+          const titles = {
+            'view-concreto': 'Concreto & Dosificación Técnica',
+            'view-ladrillos': 'Cálculo de Mampostería y Ladrillos',
+            'view-excavacion': 'Áreas, Volúmenes y Excavación',
+            'view-presupuesto': 'Presupuesto Estimado de Obra'
+          };
+          headerSubtitle.textContent = titles[viewId] || 'ConstruObra';
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        updateHubStats();
+        renderBudget();
+      }
+
+      // Eventos de barra inferior
+      navItems.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-view');
+          if (target) navigateTo(target);
+        });
+      });
+
+      backBtn.addEventListener('click', () => navigateTo('view-hub'));
+
+      // Eventos de tarjetas del Hub
+      document.querySelectorAll('[data-nav-target]').forEach(card => {
+        card.addEventListener('click', () => {
+          const target = card.getAttribute('data-nav-target');
+          navigateTo(target);
+          const scrollTarget = card.getAttribute('data-scroll-to');
+          if (scrollTarget) {
+            setTimeout(() => {
+              const el = document.getElementById(scrollTarget);
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }
+        });
+      });
+
+      document.getElementById('hub-card-presupuesto-stat').addEventListener('click', () => {
+        navigateTo('view-presupuesto');
+      });
+
+      document.getElementById('btn-goto-budget-from-conc').addEventListener('click', () => {
+        navigateTo('view-presupuesto');
+      });
+
+      // Feedback Toast
+      let toastTimer;
+      function showToast(message) {
+        const toast = document.getElementById('app-toast');
+        const text = document.getElementById('toast-text');
+        text.textContent = message;
+        toast.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
+        toast.classList.add('opacity-100', 'translate-y-0');
+
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+          toast.classList.remove('opacity-100', 'translate-y-0');
+        }, 3000);
+      }
+
+      // Actualizar información del estudiante y proyecto
+      const directStudentInput = document.getElementById('direct-student-name');
+      const directProjectInput = document.getElementById('direct-project-name');
+
+      function updateProjectInfo(syncInputs = true) {
+        if (syncInputs && directStudentInput) directStudentInput.value = state.studentName;
+        if (syncInputs && directProjectInput) directProjectInput.value = state.projectName;
+
+        const displayName = state.studentName ? state.studentName : 'Estudiante';
+        const displayProj = state.projectName ? state.projectName : 'Taller de Obra';
+
+        document.getElementById('header-student-badge').textContent = state.studentName ? state.studentName.split(' ')[0] : 'Estudiante';
+        document.getElementById('budget-project-name-sub').textContent = `Proyecto: ${displayProj}`;
+        document.getElementById('print-student-name').textContent = state.studentName || 'Estudiante de Ingeniería Civil';
+        document.getElementById('print-project-name').textContent = displayProj;
+        document.getElementById('print-date').textContent = `Fecha: ${new Date().toLocaleDateString('es-CO')}`;
+      }
+
+      if (directStudentInput) {
+        directStudentInput.addEventListener('input', (e) => {
+          state.studentName = e.target.value;
+          saveData();
+          updateProjectInfo(false);
+        });
+      }
+
+      if (directProjectInput) {
+        directProjectInput.addEventListener('input', (e) => {
+          state.projectName = e.target.value;
+          saveData();
+          updateProjectInfo(false);
+        });
+      }
+
+      updateProjectInfo();
+
+      // ==================== LÓGICA MÓDULO 1: CONCRETO ====================
+      const concLargo = document.getElementById('conc-largo');
+      const concAncho = document.getElementById('conc-ancho');
+      const concAlto = document.getElementById('conc-alto');
+      const concQty = document.getElementById('conc-qty');
+      const concWaste = document.getElementById('conc-waste');
+      const concRatio = document.getElementById('conc-ratio');
+
+      const concResVol = document.getElementById('conc-res-vol');
+      const resMatCem = document.getElementById('res-mat-cemento');
+      const resMatArena = document.getElementById('res-mat-arena');
+      const resMatGrava = document.getElementById('res-mat-grava');
+      const resMatAgua = document.getElementById('res-mat-agua');
+
+      let currentConcQty = 4;
+      let currentConcType = 'columna';
+
+      // Botones de tipo de elemento
+      document.querySelectorAll('.conc-elem-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.conc-elem-btn').forEach(b => {
+            b.className = 'conc-elem-btn py-2 text-center text-[12px] font-medium rounded-sm text-light-on-surface-variant hover:text-light-on-surface';
+          });
+          btn.className = 'conc-elem-btn py-2 text-center text-[12px] font-semibold rounded-sm bg-light-surface text-light-primary shadow-xs';
+          currentConcType = btn.getAttribute('data-type');
+
+          if (currentConcType === 'columna') {
+            concLargo.value = 0.30; concAncho.value = 0.30; concAlto.value = 2.80;
+          } else if (currentConcType === 'viga') {
+            concLargo.value = 5.00; concAncho.value = 0.30; concAlto.value = 0.40;
+          } else if (currentConcType === 'placa') {
+            concLargo.value = 6.00; concAncho.value = 4.00; concAlto.value = 0.12;
+          }
+          calcConcrete();
+        });
+      });
+
+      function calcConcrete() {
+        const l = parseFloat(concLargo.value) || 0;
+        const w = parseFloat(concAncho.value) || 0;
+        const h = parseFloat(concAlto.value) || 0;
+        const wst = parseFloat(concWaste.value) || 1.05;
+
+        const totalVol = l * w * h * currentConcQty * wst;
+        concResVol.textContent = totalVol.toFixed(3);
+
+        const selOpt = concRatio.options[concRatio.selectedIndex];
+        const fCem = parseFloat(selOpt.getAttribute('data-cemento')) || 9.0;
+        const fArena = parseFloat(selOpt.getAttribute('data-arena')) || 0.58;
+        const fGrava = parseFloat(selOpt.getAttribute('data-grava')) || 0.75;
+        const fAgua = parseFloat(selOpt.getAttribute('data-agua')) || 190;
+
+        const cemSacos = (totalVol * fCem).toFixed(1);
+        const arenaM3 = (totalVol * fArena).toFixed(2);
+        const gravaM3 = (totalVol * fGrava).toFixed(2);
+        const aguaLitros = Math.round(totalVol * fAgua);
+
+        resMatCem.textContent = cemSacos;
+        resMatArena.textContent = arenaM3;
+        resMatGrava.textContent = gravaM3;
+        resMatAgua.textContent = aguaLitros;
+
+        return { totalVol, cemSacos, arenaM3, gravaM3, aguaLitros };
+      }
+
+      document.getElementById('conc-btn-minus').addEventListener('click', () => {
+        if (currentConcQty > 1) {
+          currentConcQty--;
+          concQty.textContent = currentConcQty;
+          calcConcrete();
+        }
+      });
+
+      document.getElementById('conc-btn-plus').addEventListener('click', () => {
+        currentConcQty++;
+        concQty.textContent = currentConcQty;
+        calcConcrete();
+      });
+
+      [concLargo, concAncho, concAlto, concWaste, concRatio].forEach(el => {
+        el.addEventListener('input', calcConcrete);
+      });
+
+      // Añadir cantidades de concreto al presupuesto
+      document.getElementById('btn-add-conc-to-budget').addEventListener('click', () => {
+        const data = calcConcrete();
+        const cemQty = Math.ceil(parseFloat(data.cemSacos));
+        const arenaQty = parseFloat(data.arenaM3);
+        const gravaQty = parseFloat(data.gravaM3);
+
+        addOrUpdateBudgetItem('Cemento Gris Tipo UG', 'Bulto de 50 kg · Obtenido de Concreto', 'bultos', cemQty, 34000, 'Concreto');
+        addOrUpdateBudgetItem('Arena Gruesa de Peña', 'Metros cúbicos (m³)', 'm³', arenaQty, 78000, 'Agregados');
+        addOrUpdateBudgetItem('Triturado 3/4"', 'Metros cúbicos (m³)', 'm³', gravaQty, 95000, 'Agregados');
+
+        showToast(`${cemQty} bultos cemento, ${arenaQty}m³ arena y ${gravaQty}m³ grava añadidos al presupuesto.`);
+      });
+
+
+      // ==================== LÓGICA MÓDULO 2: LADRILLOS ====================
+      const wallL = document.getElementById('wall-length');
+      const wallH = document.getElementById('wall-height');
+      const wallDoors = document.getElementById('openings-doors');
+      const wallWin = document.getElementById('openings-windows');
+      const wallNetArea = document.getElementById('wall-net-area');
+
+      const brickPreset = document.getElementById('brick-preset');
+      const brickL = document.getElementById('brick-l');
+      const brickH = document.getElementById('brick-h');
+      const mortarJoint = document.getElementById('mortar-joint');
+      const brickWaste = document.getElementById('brick-waste');
+
+      const resBricksTotal = document.getElementById('res-total-bricks');
+      const resBricksPerM2 = document.getElementById('res-bricks-per-m2');
+      const resMortarVol = document.getElementById('res-mortar-vol');
+
+      brickPreset.addEventListener('change', () => {
+        const parts = brickPreset.value.split(',');
+        brickL.value = parts[0];
+        brickH.value = parts[2] || parts[1];
+        calcBricks();
+      });
+
+      function calcBricks() {
+        const l = parseFloat(wallL.value) || 0;
+        const h = parseFloat(wallH.value) || 0;
+        const doors = parseFloat(wallDoors.value) || 0;
+        const win = parseFloat(wallWin.value) || 0;
+
+        const gross = l * h;
+        const net = Math.max(0, gross - doors - win);
+        wallNetArea.textContent = `${net.toFixed(2)} m²`;
+
+        const bL_m = (parseFloat(brickL.value) || 24) / 100;
+        const bH_m = (parseFloat(brickH.value) || 6) / 100;
+        const j_m = (parseFloat(mortarJoint.value) || 1.5) / 100;
+        const wst = parseFloat(brickWaste.value) || 1.05;
+
+        const unitArea = (bL_m + j_m) * (bH_m + j_m);
+        const perM2 = unitArea > 0 ? (1 / unitArea) : 0;
+        const total = Math.ceil(net * perM2 * wst);
+
+        resBricksPerM2.innerHTML = `${perM2.toFixed(1)} <span class="text-[12px] font-normal">lad/m²</span>`;
+        resBricksTotal.textContent = total;
+
+        const mortarVol = net * 0.018 * wst;
+        const bultos = Math.ceil(mortarVol * 9);
+        resMortarVol.textContent = `~${mortarVol.toFixed(2)} m³ (~${bultos} bultos cem.)`;
+
+        return { total, perM2, net, mortarVol, bultos };
+      }
+
+      [wallL, wallH, wallDoors, wallWin, brickL, brickH, mortarJoint, brickWaste].forEach(el => {
+        el.addEventListener('input', calcBricks);
+      });
+
+      document.getElementById('btn-add-bricks-to-budget').addEventListener('click', () => {
+        const data = calcBricks();
+        const selName = brickPreset.options[brickPreset.selectedIndex].text.split('(')[0].trim();
+
+        addOrUpdateBudgetItem(selName, `Unidades · Muro fachada (${data.net.toFixed(1)} m²)`, 'unid', data.total, 2200, 'Mampostería');
+        addOrUpdateBudgetItem('Cemento para Pega (Mortero 1:4)', 'Bultos de 50 kg para pega de ladrillos', 'bultos', data.bultos, 34000, 'Mampostería');
+
+        showToast(`${data.total} unidades de ladrillos y mortero agregados.`);
+      });
+
+
+      // ==================== LÓGICA MÓDULO 3: EXCAVACIONES Y ÁREAS ====================
+      const excLargo = document.getElementById('exc-largo');
+      const excAncho = document.getElementById('exc-ancho');
+      const excProf = document.getElementById('exc-prof');
+      const excSoil = document.getElementById('exc-soil');
+
+      const resBankVol = document.getElementById('res-bank-vol');
+      const resAreaTop = document.getElementById('res-area-top');
+      const resLooseVol = document.getElementById('res-loose-vol');
+      const resTrucks = document.getElementById('res-trucks');
+
+      const floorL = document.getElementById('floor-l');
+      const floorW = document.getElementById('floor-w');
+      const resFloorArea = document.getElementById('res-floor-area');
+
+      function calcExcavation() {
+        const l = parseFloat(excLargo.value) || 0;
+        const w = parseFloat(excAncho.value) || 0;
+        const h = parseFloat(excProf.value) || 0;
+        const swell = parseFloat(excSoil.value) || 1.20;
+
+        const areaTop = l * w;
+        const bankVol = areaTop * h;
+        const looseVol = bankVol * swell;
+        const trips = Math.ceil(looseVol / 7);
+
+        resAreaTop.textContent = `${areaTop.toFixed(2)} m²`;
+        resBankVol.textContent = `${bankVol.toFixed(2)} m³`;
+        resLooseVol.textContent = looseVol.toFixed(2);
+        resTrucks.textContent = `~${trips} viaje${trips === 1 ? '' : 's'}`;
+
+        const fl = parseFloat(floorL.value) || 0;
+        const fw = parseFloat(floorW.value) || 0;
+        resFloorArea.textContent = `${(fl * fw).toFixed(2)} m²`;
+
+        return { trips, looseVol, bankVol };
+      }
+
+      [excLargo, excAncho, excProf, excSoil, floorL, floorW].forEach(el => {
+        el.addEventListener('input', calcExcavation);
+      });
+
+      // Pestañas internas de excavación
+      const tabExcBtn = document.getElementById('tab-excavacion-btn');
+      const tabAreaBtn = document.getElementById('tab-area-btn');
+      const panelExc = document.getElementById('panel-excavacion');
+      const panelArea = document.getElementById('panel-area');
+
+      tabExcBtn.addEventListener('click', () => {
+        tabExcBtn.className = 'flex-1 py-2 text-center rounded-sm font-semibold transition-colors bg-light-primary text-light-on-primary shadow-xs';
+        tabAreaBtn.className = 'flex-1 py-2 text-center rounded-sm font-medium transition-colors text-light-on-surface-variant hover:text-light-on-surface';
+        panelExc.classList.remove('hidden');
+        panelArea.classList.remove('hidden');
+      });
+
+      tabAreaBtn.addEventListener('click', () => {
+        tabAreaBtn.className = 'flex-1 py-2 text-center rounded-sm font-semibold transition-colors bg-light-primary text-light-on-primary shadow-xs';
+        tabExcBtn.className = 'flex-1 py-2 text-center rounded-sm font-medium transition-colors text-light-on-surface-variant hover:text-light-on-surface';
+        panelArea.scrollIntoView({ behavior: 'smooth' });
+      });
+
+      document.getElementById('btn-add-exca-to-budget').addEventListener('click', () => {
+        const data = calcExcavation();
+        addOrUpdateBudgetItem('Acarreo y Retiro de Tierra en Volqueta', `Capacidad 7 m³ · ${data.looseVol.toFixed(1)} m³ esponjados`, 'viajes', data.trips, 180000, 'Movimiento Tierras');
+        showToast(`${data.trips} viaje(s) de volqueta agregados al presupuesto.`);
+      });
+
+
+      // ==================== CÁLCULO RÁPIDO EN VIVO DEL HUB ====================
+      const qLargo = document.getElementById('quick-largo');
+      const qAncho = document.getElementById('quick-ancho');
+      const qAlto = document.getElementById('quick-alto');
+      const qWaste = document.getElementById('quick-sel-waste');
+      const qQtyTxt = document.getElementById('quick-txt-qty');
+      const qResVol = document.getElementById('quick-res-volume');
+      const qResCem = document.getElementById('quick-res-cement');
+      let quickQty = 4;
+
+      function calcQuick() {
+        const l = parseFloat(qLargo.value) || 0;
+        const w = parseFloat(qAncho.value) || 0;
+        const h = parseFloat(qAlto.value) || 0;
+        const wst = parseFloat(qWaste.value) || 1.05;
+
+        const total = l * w * h * quickQty * wst;
+        qResVol.textContent = total.toFixed(3);
+        const bultos = Math.ceil(total * 9.5);
+        qResCem.textContent = `~${bultos} bultos (50kg)`;
+        return { total, bultos };
+      }
+
+      document.getElementById('quick-btn-minus').addEventListener('click', () => {
+        if (quickQty > 1) {
+          quickQty--;
+          qQtyTxt.textContent = quickQty;
+          calcQuick();
+        }
+      });
+
+      document.getElementById('quick-btn-plus').addEventListener('click', () => {
+        quickQty++;
+        qQtyTxt.textContent = quickQty;
+        calcQuick();
+      });
+
+      [qLargo, qAncho, qAlto, qWaste].forEach(el => el.addEventListener('input', calcQuick));
+
+      document.getElementById('quick-btn-add-budget').addEventListener('click', () => {
+        const res = calcQuick();
+        addOrUpdateBudgetItem('Concreto Preparado en Sitio', `Elemento estructural (${res.total.toFixed(2)} m³)`, 'm³', parseFloat(res.total.toFixed(2)), 380000, 'Concreto');
+        showToast(`${res.total.toFixed(2)} m³ de concreto agregados a la memoria.`);
+      });
+
+
+      // ==================== LÓGICA MÓDULO 4: PRESUPUESTO ====================
+      const budgetContainer = document.getElementById('budget-list-container');
+      const grandTotalDisplay = document.getElementById('grand-total-display');
+      const currSelect = document.getElementById('budget-currency-select');
+
+      currSelect.value = state.currency;
+      currSelect.addEventListener('change', () => {
+        state.currency = currSelect.value;
+        saveData();
+        renderBudget();
+      });
+
+      function addOrUpdateBudgetItem(name, unitDesc, unit, qty, price, category) {
+        const existing = state.budgetItems.find(i => i.name.trim().toLowerCase() === name.trim().toLowerCase());
+        if (existing) {
+          existing.qty = parseFloat((existing.qty + qty).toFixed(2));
+        } else {
+          state.budgetItems.push({
+            id: 'item-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+            name,
+            unitDesc: unitDesc || `Unidad: ${unit}`,
+            unit,
+            qty: parseFloat(qty.toFixed(2)),
+            price: price || 0,
+            category: category || 'General'
+          });
+        }
+        saveData();
+        renderBudget();
+        updateHubStats();
+      }
+
+      function renderBudget() {
+        budgetContainer.innerHTML = '';
+
+        if (state.budgetItems.length === 0) {
+          budgetContainer.innerHTML = `
+            <div class="bg-light-surface rounded-lg border border-light-outline p-6 text-center text-light-on-surface-variant">
+              <span class="material-symbols-outlined text-[32px] text-light-outline mb-1">receipt_long</span>
+              <p class="font-semibold text-[14px]">No hay materiales en el presupuesto</p>
+              <p class="text-[12px] mt-0.5">Usa los módulos de Concreto, Ladrillos o Excavación para agregar insumos.</p>
+            </div>
+          `;
+          grandTotalDisplay.textContent = formatMoney(0);
+          document.getElementById('hub-stat-budget').textContent = formatMoney(0);
+          document.getElementById('budget-items-count-badge').textContent = '0 ítems activos';
+          document.getElementById('hub-stat-items').textContent = '0 materiales cotizados';
+          return;
+        }
+
+        let subtotal = 0;
+
+        state.budgetItems.forEach((item, index) => {
+          const itemSubtotal = (parseFloat(item.qty) || 0) * (parseFloat(item.price) || 0);
+          subtotal += itemSubtotal;
+
+          const article = document.createElement('article');
+          article.className = 'bg-light-surface rounded-lg border border-light-outline p-3.5 space-y-2.5 shadow-xs';
+          
+          let iconName = 'inventory_2';
+          let iconBg = 'bg-amber-100 text-light-primary';
+          if (item.category === 'Agregados') { iconName = 'grain'; iconBg = 'bg-amber-100 text-amber-900'; }
+          else if (item.category === 'Mampostería') { iconName = 'grid_view'; iconBg = 'bg-rose-100 text-rose-800'; }
+          else if (item.category === 'Movimiento Tierras') { iconName = 'local_shipping'; iconBg = 'bg-emerald-100 text-emerald-800'; }
+
+          article.innerHTML = `
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-DEFAULT ${iconBg} flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[18px]">${iconName}</span>
+                </div>
+                <div>
+                  <h3 class="font-headline text-[14px] font-semibold text-light-on-surface leading-tight">${item.name}</h3>
+                  <span class="text-[11px] text-light-on-surface-variant">${item.unitDesc || item.unit}</span>
+                </div>
+              </div>
+              <button type="button" aria-label="Eliminar ítem" class="btn-del-item text-light-outline hover:text-red-600 transition-colors p-1" data-index="${index}">
+                <span class="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 pt-1 border-t border-light-outline-variant text-[12px]">
+              <div>
+                <span class="text-[10px] text-light-on-surface-variant block">Cantidad</span>
+                <div class="flex items-center gap-1 mt-0.5">
+                  <input type="number" step="0.1" min="0" value="${item.qty}" class="input-item-qty w-full text-center py-1 px-1 text-[13px] rounded-sm border border-light-outline bg-light-surface tabular-nums font-mono focus:border-light-primary focus:outline-none" data-index="${index}">
+                  <span class="text-[11px] text-light-on-surface-variant">${item.unit}</span>
+                </div>
+              </div>
+
+              <div>
+                <span class="text-[10px] text-light-on-surface-variant block">Precio unitario ($)</span>
+                <input type="number" step="100" min="0" value="${item.price}" class="input-item-price w-full text-center py-1 px-1 text-[13px] rounded-sm border border-light-outline bg-light-surface tabular-nums font-mono focus:border-light-primary focus:outline-none mt-0.5" data-index="${index}">
+              </div>
+
+              <div class="text-right">
+                <span class="text-[10px] text-light-on-surface-variant block">Subtotal</span>
+                <p class="font-semibold text-light-on-surface tabular-nums mt-1 text-[13px]">${formatMoney(itemSubtotal)}</p>
+              </div>
+            </div>
+          `;
+
+          // Eventos de edición rápida en la lista
+          article.querySelector('.input-item-qty').addEventListener('change', (e) => {
+            const idx = parseInt(e.target.getAttribute('data-index'));
+            state.budgetItems[idx].qty = Math.max(0, parseFloat(e.target.value) || 0);
+            saveData();
+            renderBudget();
+            updateHubStats();
+          });
+
+          article.querySelector('.input-item-price').addEventListener('change', (e) => {
+            const idx = parseInt(e.target.getAttribute('data-index'));
+            state.budgetItems[idx].price = Math.max(0, parseFloat(e.target.value) || 0);
+            saveData();
+            renderBudget();
+            updateHubStats();
+          });
+
+          article.querySelector('.btn-del-item').addEventListener('click', (e) => {
+            const idx = parseInt(e.currentTarget.getAttribute('data-index'));
+            state.budgetItems.splice(idx, 1);
+            saveData();
+            renderBudget();
+            updateHubStats();
+            showToast('Material eliminado del presupuesto.');
+          });
+
+          budgetContainer.appendChild(article);
+        });
+
+        const grandTotal = subtotal * (1 + state.contingencyPct);
+        grandTotalDisplay.textContent = formatMoney(grandTotal);
+        document.getElementById('hub-stat-budget').textContent = formatMoney(grandTotal);
+        document.getElementById('budget-items-count-badge').textContent = `${state.budgetItems.length} ítems activos`;
+        document.getElementById('hub-stat-items').textContent = `${state.budgetItems.length} materiales cotizados`;
+      }
+
+      function updateHubStats() {
+        const concData = calcConcrete();
+        document.getElementById('hub-stat-concrete').textContent = concData.totalVol.toFixed(3);
+        document.getElementById('hub-stat-cement').textContent = `~${Math.ceil(parseFloat(concData.cemSacos))} bultos cem.`;
+      }
+
+      document.getElementById('btn-clear-budget-list').addEventListener('click', () => {
+        if (confirm('¿Deseas vaciar todos los materiales del presupuesto?')) {
+          state.budgetItems = [];
+          saveData();
+          renderBudget();
+          showToast('Presupuesto vaciado.');
+        }
+      });
+
+      // Exportar en PDF (Impresión del Navegador)
+      document.getElementById('btn-export-pdf').addEventListener('click', () => {
+        window.print();
+      });
+
+      // Modales: Alcance & PRD
+      const modalScope = document.getElementById('modal-scope');
+      document.getElementById('btn-open-scope-modal').addEventListener('click', () => modalScope.classList.remove('hidden'));
+      document.getElementById('btn-close-scope-modal').addEventListener('click', () => modalScope.classList.add('hidden'));
+      document.getElementById('btn-scope-ok').addEventListener('click', () => modalScope.classList.add('hidden'));
+
+      // Modales: Estudiante y Proyecto
+      const modalProject = document.getElementById('modal-project');
+      const inputStudent = document.getElementById('input-student-name');
+      const inputProject = document.getElementById('input-project-name');
+
+      function openProjectModal() {
+        inputStudent.value = state.studentName;
+        inputProject.value = state.projectName;
+        modalProject.classList.remove('hidden');
+      }
+
+      const btnEditProj = document.getElementById('btn-edit-project');
+      if (btnEditProj) btnEditProj.addEventListener('click', openProjectModal);
+      document.getElementById('btn-student-profile').addEventListener('click', openProjectModal);
+      document.getElementById('btn-close-project-modal').addEventListener('click', () => modalProject.classList.add('hidden'));
+
+      document.getElementById('btn-save-project-data').addEventListener('click', () => {
+        state.studentName = inputStudent.value.trim() || 'Estudiante';
+        state.projectName = inputProject.value.trim() || 'Proyecto Académico';
+        saveData();
+        updateProjectInfo();
+        modalProject.classList.add('hidden');
+        showToast('Datos de taller actualizados.');
+      });
+
+      // Modales: Añadir Material Manual
+      const modalAdd = document.getElementById('modal-add-material');
+      document.getElementById('btn-open-add-material-modal').addEventListener('click', () => modalAdd.classList.remove('hidden'));
+      document.getElementById('btn-close-add-modal').addEventListener('click', () => modalAdd.classList.add('hidden'));
+
+      document.getElementById('form-new-material').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('new-mat-name').value.trim();
+        const unit = document.getElementById('new-mat-unit').value.trim();
+        const qty = parseFloat(document.getElementById('new-mat-qty').value) || 1;
+        const price = parseFloat(document.getElementById('new-mat-price').value) || 0;
+
+        if (name) {
+          addOrUpdateBudgetItem(name, `Partida adicional · ${unit}`, unit, qty, price, 'Personalizado');
+          modalAdd.classList.add('hidden');
+          document.getElementById('new-mat-name').value = '';
+          showToast(`"${name}" agregado al presupuesto.`);
+        }
+      });
+
+      // Inicialización de cálculos
+      calcConcrete();
+      calcBricks();
+      calcExcavation();
+      calcQuick();
+      renderBudget();
+      updateHubStats();
+
+    })();
+  </script>
+
+</body>
+</html>
